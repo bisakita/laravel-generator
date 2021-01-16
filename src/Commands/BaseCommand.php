@@ -76,8 +76,8 @@ class BaseCommand extends Command
         }
 
         if ($this->commandData->getOption('factory') || (
-            !$this->isSkip('tests') and $this->commandData->getAddOn('tests')
-        )) {
+                !$this->isSkip('tests') and $this->commandData->getAddOn('tests')
+            )) {
             $factoryGenerator = new FactoryGenerator($this->commandData);
             $factoryGenerator->generate();
         }
@@ -194,7 +194,7 @@ class BaseCommand extends Command
     public function isSkip($skip)
     {
         if ($this->commandData->getOption('skip')) {
-            return in_array($skip, (array) $this->commandData->getOption('skip'));
+            return in_array($skip, (array)$this->commandData->getOption('skip'));
         }
 
         return false;
@@ -211,31 +211,31 @@ class BaseCommand extends Command
 
         foreach ($this->commandData->fields as $field) {
             $fileFields[] = [
-                'name'        => $field->name,
-                'dbType'      => $field->dbInput,
-                'htmlType'    => $field->htmlInput,
+                'name' => $field->name,
+                'dbType' => $field->dbInput,
+                'htmlType' => $field->htmlInput,
                 'validations' => $field->validations,
-                'searchable'  => $field->isSearchable,
-                'fillable'    => $field->isFillable,
-                'primary'     => $field->isPrimary,
-                'inForm'      => $field->inForm,
-                'inIndex'     => $field->inIndex,
-                'inView'      => $field->inView,
+                'searchable' => $field->isSearchable,
+                'fillable' => $field->isFillable,
+                'primary' => $field->isPrimary,
+                'inForm' => $field->inForm,
+                'inIndex' => $field->inIndex,
+                'inView' => $field->inView,
             ];
         }
 
         foreach ($this->commandData->relations as $relation) {
             $fileFields[] = [
-                'type'     => 'relation',
-                'relation' => $relation->type.','.implode(',', $relation->inputs),
+                'type' => 'relation',
+                'relation' => $relation->type . ',' . implode(',', $relation->inputs),
             ];
         }
 
         $path = config('infyom.laravel_generator.path.schema_files', resource_path('model_schemas/'));
 
-        $fileName = $this->commandData->modelName.'.json';
+        $fileName = $this->commandData->modelName . '.json';
 
-        if (file_exists($path.$fileName) && !$this->confirmOverwrite($fileName)) {
+        if (file_exists($path . $fileName) && !$this->confirmOverwrite($fileName)) {
             return;
         }
         FileUtil::createFile($path, $fileName, json_encode($fileFields, JSON_PRETTY_PRINT));
@@ -247,8 +247,8 @@ class BaseCommand extends Command
     {
         $locales = [
             'singular' => $this->commandData->modelName,
-            'plural'   => $this->commandData->config->mPlural,
-            'fields'   => [],
+            'plural' => $this->commandData->config->mPlural,
+            'fields' => [],
         ];
 
         foreach ($this->commandData->fields as $field) {
@@ -257,12 +257,12 @@ class BaseCommand extends Command
 
         $path = config('infyom.laravel_generator.path.models_locale_files', base_path('resources/lang/en/models/'));
 
-        $fileName = $this->commandData->config->mCamelPlural.'.php';
+        $fileName = $this->commandData->config->mCamelPlural . '.php';
 
-        if (file_exists($path.$fileName) && !$this->confirmOverwrite($fileName)) {
+        if (file_exists($path . $fileName) && !$this->confirmOverwrite($fileName)) {
             return;
         }
-        $content = "<?php\n\nreturn ".var_export($locales, true).';'.\PHP_EOL;
+        $content = "<?php\n\nreturn " . var_export($locales, true) . ';' . \PHP_EOL;
         FileUtil::createFile($path, $fileName, $content);
         $this->commandData->commandComment("\nModel Locale File saved: ");
         $this->commandData->commandInfo($fileName);
@@ -277,7 +277,7 @@ class BaseCommand extends Command
     protected function confirmOverwrite($fileName, $prompt = '')
     {
         $prompt = (empty($prompt))
-            ? $fileName.' already exists. Do you want to overwrite it? [y|N]'
+            ? $fileName . ' already exists. Do you want to overwrite it? [y|N]'
             : $prompt;
 
         return $this->confirm($prompt, false);
@@ -291,6 +291,7 @@ class BaseCommand extends Command
     public function getOptions()
     {
         return [
+            ['module', null, InputOption::VALUE_REQUIRED, 'The module name want you create crud at on'],
             ['fieldsFile', null, InputOption::VALUE_REQUIRED, 'Fields input as json file'],
             ['jsonFromGUI', null, InputOption::VALUE_REQUIRED, 'Direct Json string while using GUI interface'],
             ['plural', null, InputOption::VALUE_REQUIRED, 'Plural Model name'],
