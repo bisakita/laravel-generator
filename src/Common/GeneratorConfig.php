@@ -77,12 +77,12 @@ class GeneratorConfig
 
     /** @var CommandData */
     private $commandData;
-//
-//    /* Namespace variables */
-//    public $nsModule;
-//
-//    /* Path variables */
-//    public $pathModule;
+
+    /* Namespace variables */
+    public $nsModule;
+
+    /* Path variables */
+    public $pathModule;
 
     /* Command Options */
     public static $availableOptions = [
@@ -128,7 +128,8 @@ class GeneratorConfig
 
         $this->mName = $commandData->modelName;
 
-//        $this->modulePrepare($commandData);
+        $this->modulePrepare($commandData,$options);
+
         $this->prepareAddOns();
         $this->prepareOptions($commandData);
         $this->prepareModelNames();
@@ -141,105 +142,16 @@ class GeneratorConfig
         $this->commandData = &$commandData;
     }
 
-//    public function modulePrepare($commandData){
-//
-//        // Getting module name option or active if exists
-//        $moduleOption = Str::studly($commandData->commandObj->option('module')) ?: app('modules')->getUsedNow();
-//
-//        // If it is set and module exists do the stuff else show an error message
-//        if (!empty($moduleOption)) {
-//            if (app('modules')->has($moduleOption)) {
-//                $this->changeConfig($moduleOption);
-//            } else {
-//                $commandData->commandObj->error("Module [{$moduleOption}] does not exists.");
-//            }
-//        }
-//    }
-//
-//    public function loadNamespaces(CommandData &$commandData)
-//    {
-//        // Get if module option is passed
-//        $module = $commandData->commandObj->option('module');
-//
-//        if ($module) {
-//            $this->nsModule = 'Modules\\'.$module;
-//        }
-//
-//        parent::loadNamespaces($commandData);
-//
-//        $this->nsModelExtend = config(
-//            'modules.generator.model_extend_class',
-//            'Illuminate\Database\Eloquent\Model'
-//        );
-//    }
-//
-//    public function loadDynamicVariables(CommandData &$commandData)
-//    {
-//        if ($this->nsModule) {
-//            $commandData->addDynamicVariable('$NAMESPACE_MODULE', $this->nsModule);
-//        }
-//
-//        return parent::loadDynamicVariables($commandData);
-//    }
-//
-//    public function changeConfig($moduleName)
-//    {
-//        $config = app('config');
-//
-//        // Getting paths patterns
-//        $modulePaths = $config->get('modules.generator.path');
-//
-//        // Getting namespaces patterns
-//        $moduleNamespaces = $config->get('modules.generator.namespace');
-//
-//        // Getting add_on definition from generator
-//        $addOn = $config->get('modules.generator.add_on');
-//
-//        // Getting template definition from generator
-//        $templates = $config->get('modules.generator.templates');
-//
-//        // Getting template dir definition from generator
-//        $templatesDir = $config->get('modules.generator.path.templates_dir');
-//
-//        // Replacing paths
-//        array_walk($modulePaths, function (&$item, $key, $module) {
-//            $item = str_replace('{Module}', $module, $item);
-//        }, $moduleName);
-//
-//        // Replacing namespaces
-//        array_walk($moduleNamespaces, function (&$item, $key, $module) {
-//            $item = str_replace('{Module}', $module, $item);
-//        }, $moduleName);
-//
-//        // Overriding paths
-//        $config->set('infyom.laravel_generator.path', $modulePaths);
-//
-//        // Overriding namespaces
-//        $config->set('infyom.laravel_generator.namespace', $moduleNamespaces);
-//
-//        // Override add_on definition
-//        $config->set('infyom.laravel_generator.add_on', $addOn);
-//
-//        // Override templates definition
-//        $config->set('infyom.laravel_generator.templates', $templates);
-//
-//        // Override templates dir definition
-//        $config->set('infyom.laravel_generator.path.templates_dir', $templatesDir);
-//    }
-//
-//    public function prepareAddOns()
-//    {
-//        $this->addOns['swagger'] = config('modules.generator.add_on.swagger', false);
-//        $this->addOns['tests'] = config('modules.generator.add_on.tests', false);
-//        $this->addOns['datatables'] = config('modules.generator.add_on.datatables', false);
-//        $this->addOns['menu.enabled'] = config('modules.generator.add_on.menu.enabled', false);
-//        $this->addOns['menu.menu_file'] = config('modules.generator.add_on.menu.menu_file', 'layouts.menu');
-//    }
-
-
-
     public function loadNamespaces(CommandData &$commandData)
     {
+
+        // Get if module option is passed
+        $module = $commandData->commandObj->option('module');
+
+        if ($module) {
+            $this->nsModule = 'Modules\\' . $module;
+        }
+
         $prefix = $this->prefixes['ns'];
 
         if (!empty($prefix)) {
@@ -256,10 +168,6 @@ class GeneratorConfig
         $this->nsSeeder = config('infyom.laravel_generator.namespace.seeder', 'Database\Seeders').$prefix;
         $this->nsFactory = config('infyom.laravel_generator.namespace.factory', 'Database\Factories').$prefix;
         $this->nsDataTables = config('infyom.laravel_generator.namespace.datatables', 'App\DataTables').$prefix;
-        $this->nsModelExtend = config(
-            'infyom.laravel_generator.model_extend_class',
-            'Illuminate\Database\Eloquent\Model'
-        );
 
         $this->nsApiController = config(
             'infyom.laravel_generator.namespace.api_controller',
@@ -279,6 +187,12 @@ class GeneratorConfig
         $this->nsApiTests = config('infyom.laravel_generator.namespace.api_test', 'Tests\APIs');
         $this->nsRepositoryTests = config('infyom.laravel_generator.namespace.repository_test', 'Tests\Repositories');
         $this->nsTests = config('infyom.laravel_generator.namespace.tests', 'Tests');
+
+
+        $this->nsModelExtend = config(
+            'modules.generator.model_extend_class',
+            'Illuminate\Database\Eloquent\Model'
+        );
     }
 
     public function loadPaths()
@@ -361,7 +275,10 @@ class GeneratorConfig
 
     public function loadDynamicVariables(CommandData &$commandData)
     {
-
+        if ($this->nsModule) {
+            $commandData->addDynamicVariable('$NAMESPACE_MODULE', $this->nsModule);
+        }
+        
         $commandData->addDynamicVariable('$NAMESPACE_APP$', $this->nsApp);
         $commandData->addDynamicVariable('$NAMESPACE_REPOSITORY$', $this->nsRepository);
         $commandData->addDynamicVariable('$NAMESPACE_MODEL$', $this->nsModel);

@@ -7,11 +7,6 @@ use InfyOm\Generator\Common\GeneratorConfig as InfyOmGeneratorConfig;
 
 trait GeneratorModuleConfig
 {
-    /* Namespace variables */
-    public $nsModule;
-
-    /* Path variables */
-    public $pathModule;
 
 //    /* Command Options */
 //    public static $availableOptions = [
@@ -34,7 +29,7 @@ trait GeneratorModuleConfig
      * @param CommandData $commandData
      * @param null $options
      */
-    public function init(CommandData &$commandData, $options = null)
+    public function modulePrepare(CommandData &$commandData, $options = null)
     {
         // Getting module name option or active if exists
         $moduleOption = Str::studly($commandData->commandObj->option('module')) ?: app('modules')->getUsedNow();
@@ -47,43 +42,8 @@ trait GeneratorModuleConfig
                 $commandData->commandObj->error("Module [{$moduleOption}] does not exists.");
             }
         }
-
-        parent::init($commandData, $options);
     }
-
-    /**
-     * @param CommandData $commandData
-     */
-    public function loadNamespaces(CommandData &$commandData)
-    {
-        // Get if module option is passed
-        $module = $commandData->commandObj->option('module');
-
-        if ($module) {
-            $this->nsModule = 'Modules\\' . $module;
-        }
-
-        parent::loadNamespaces($commandData);
-
-        $this->nsModelExtend = config(
-            'modules.generator.model_extend_class',
-            'Illuminate\Database\Eloquent\Model'
-        );
-    }
-
-    /**
-     * @param CommandData $commandData
-     * @return CommandData
-     */
-    public function loadDynamicVariables(CommandData &$commandData)
-    {
-        if ($this->nsModule) {
-            $commandData->addDynamicVariable('$NAMESPACE_MODULE', $this->nsModule);
-        }
-
-        return parent::loadDynamicVariables($commandData);
-    }
-
+    
     /**
      * Change the paths and namespaces definitions for generator to the specific target module
      *
@@ -132,17 +92,5 @@ trait GeneratorModuleConfig
 
         // Override templates dir definition
         $config->set('infyom.laravel_generator.path.templates_dir', $templatesDir);
-    }
-
-    /**
-     *
-     */
-    public function prepareAddOns()
-    {
-        $this->addOns['swagger'] = config('modules.generator.add_on.swagger', false);
-        $this->addOns['tests'] = config('modules.generator.add_on.tests', false);
-        $this->addOns['datatables'] = config('modules.generator.add_on.datatables', false);
-        $this->addOns['menu.enabled'] = config('modules.generator.add_on.menu.enabled', false);
-        $this->addOns['menu.menu_file'] = config('modules.generator.add_on.menu.menu_file', 'layouts.menu');
     }
 }
